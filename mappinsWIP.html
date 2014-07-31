@@ -1,0 +1,57 @@
+<html>
+    <body>
+      <div id="mapdiv"></div>
+      <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+      <script>
+        map = new OpenLayers.Map("mapdiv");
+        map.addLayer(new OpenLayers.Layer.OSM());
+        var strategy = new OpenLayers.Strategy.Cluster({
+            distance: 15,
+            //clustering: true
+        });
+        var markersLayer = new OpenLayers.Layer.Vector("Clustered Markers", {strategies: [strategy]});
+        var vector = new OpenLayers.Layer.Vector("Features", {
+          strategies: [new OpenLayers.Strategy.BBOX({resFactor:1})],
+          protocol: new OpenLayers.Protocol.HTTP({
+            url: "/pins.json",
+            format: new OpenLayers.Format.GeoJSON()
+          })
+        s});
+        
+        var markers = [];
+        function generate_point (longitude, latitude) {
+            var px = longitude;
+            var py = latitude;
+            var p = new OpenLayers.Geometry.Point(px, py)
+	            .transform(
+                new OpenLayers.Projection("EPSG:4326"),
+                map.getProjectionObject()
+              );
+  		/*.transform(
+                new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                //map.getProjectionObject() // to Spherical Mercator Projection
+				//new OpenLayers.Projection("ESPG:900913")
+				//new OpenLayers.Projection("ESPG:3857")
+              )*/
+            var f = new OpenLayers.Feature.Vector(p);
+            markers.push(f);
+        }
+		
+        var lonLat = new OpenLayers.LonLat( -1.547139, 54.583426 )
+              .transform(
+                new OpenLayers.Projection("EPSG:4326"),
+                map.getProjectionObject()
+              );
+     
+        var zoom=16;
+        generate_point(-1.547139 ,54.583426)
+//        generate_point(-100000.547139 ,5400000.583426)
+        console.log (markers)
+		markersLayer.addFeatures(markers);
+    map.addlayer(vector)
+		map.addLayer(markersLayer);
+        map.setCenter (lonLat, zoom);
+        map.zoomToMaxExtent();
+      </script>
+    </body>
+</html>
